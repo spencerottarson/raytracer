@@ -22,13 +22,22 @@ func main() {
 	fmt.Fprintf(writer, "%d %d\n", width, height)
 	fmt.Fprintln(writer, "255")
 
+	lowerLeftCorner := makeVec3(-2.0, -1.0, -1.0)
+	horizontal := makeVec3(4.0, 0.0, 0.0)
+	vertical := makeVec3(0.0, 2.0, 0.0)
+	origin := makeVec3(0.0, 0.0, 0.0)
+
 	for row := height - 1; row >= 0; row-- {
 		for column := 0; column < width; column++ {
-			vec3 := makeVec3(float32(column) / float32(width), float32(row) / float32(height), float32(0.2))
+			u := float32(column) / float32(width)
+			v := float32(row) / float32(height)
 
-			rInt := int16(255.99*vec3.r())
-			gInt := int16(255.99*vec3.g())
-			bInt := int16(255.99*vec3.b())
+			ray := makeRay(origin, lowerLeftCorner.add(horizontal.multiplyByValue(u)).add(vertical.multiplyByValue(v)))
+			color := ray.backgroundColor()
+
+			rInt := int16(255.99*color.r())
+			gInt := int16(255.99*color.g())
+			bInt := int16(255.99*color.b())
 			fmt.Fprintf(writer, "%d %d %d\n", rInt, gInt, bInt)
 		}
 	}

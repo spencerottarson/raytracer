@@ -33,7 +33,7 @@ func main() {
 			v := float32(row) / float32(height)
 
 			ray := makeRay(origin, lowerLeftCorner.add(horizontal.multiplyByValue(u)).add(vertical.multiplyByValue(v)))
-			color := ray.backgroundColor()
+			color := ray.color()
 
 			rInt := int16(255.99*color.r())
 			gInt := int16(255.99*color.g())

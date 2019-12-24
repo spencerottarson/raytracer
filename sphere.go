@@ -17,13 +17,13 @@ func (sphere Sphere) hit(ray *Ray, tMin float32, tMax float32) (bool, HitRecord)
 		temp := (-b - sqrt(discriminant)) / a
 		if temp < tMax && temp > tMin {
 			point := ray.pointAtParameter(temp)
-			normal := divideByValue(subtract(point, sphere.center), sphere.radius)
+			normal := divideScalar(subtract(point, sphere.center), sphere.radius)
 			return true, HitRecord{temp, point, normal, sphere.material}
 		}
 		temp = (-b + sqrt(discriminant)) / a
 		if temp < tMax && temp > tMin {
 			point := ray.pointAtParameter(temp)
-			normal := divideByValue(subtract(point, sphere.center), sphere.radius)
+			normal := divideScalar(subtract(point, sphere.center), sphere.radius)
 			return true, HitRecord{temp, point, normal, sphere.material}
 		}
 	}

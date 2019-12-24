@@ -11,7 +11,7 @@ func sqrt(value float32) float32 {
 
 func randomInUnitSphere() Vec3 {
 	for {
-		vector := subtract(multiplyByValue(makeVec3(rand.Float32(), rand.Float32(), rand.Float32()), 2.0), makeVec3(1,1,1))
+		vector := subtract(multiplyScalar(makeVec3(rand.Float32(), rand.Float32(), rand.Float32()), 2.0), makeVec3(1,1,1))
 		if vector.squaredLength() < 1.0 {
 			return vector
 		}

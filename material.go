@@ -7,7 +7,7 @@ type Material interface {
 }
 
 func reflect(vIn Vec3, normal *Vec3) Vec3 {
-	return subtract(vIn, multiplyByValue(*normal, 2*dot(vIn, *normal)))
+	return subtract(vIn, multiplyScalar(*normal, 2*dot(vIn, *normal)))
 }
 
 func refract(vIn Vec3, normal *Vec3, nIOverNT float32) (bool, Vec3) {
@@ -18,7 +18,7 @@ func refract(vIn Vec3, normal *Vec3, nIOverNT float32) (bool, Vec3) {
 	discriminant := 1.0 - nIOverNT*nIOverNT*(1-dt*dt)
 
 	if discriminant > 0 {
-		refracted := subtract(multiplyByValue(subtract(uv, multiplyByValue(*normal, dt)), nIOverNT), multiplyByValue(*normal, sqrt(discriminant)))
+		refracted := subtract(multiplyScalar(subtract(uv, multiplyScalar(*normal, dt)), nIOverNT), multiplyScalar(*normal, sqrt(discriminant)))
 		return true, refracted
 	} else {
 		return false, makeVec3(0,0,0)

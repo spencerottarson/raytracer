@@ -9,25 +9,26 @@ import (
 )
 
 const (
-	width = 200
-	height = 100
-	passesPerThread = 50
+	width = 800
+	height = 400
+	passesPerThread = 20
 	concurrent = 4
 )
 
 type Image [width*height]Vec3
 
 func main() {
-	camera := makeCamera()
+	camera := makeCamera(makeVec3(-2, 2, 1),  makeVec3(0, 0, -1), makeVec3(0, 1, 0), 30, float32(width)/float32(height))
 
 	list := []Hittable {
+
 		Sphere{makeVec3(0,0,-1), 0.5, Lambertian{makeVec3(0.1, 0.3, 0.9)}},
 		Sphere{makeVec3(0,-100.5,-1), 100, Lambertian{makeVec3(0.8, 0.8, 0.0)}},
 		Sphere{makeVec3(1,0,-1), 0.3, Metal{makeVec3(0.83, 0.69, 0.22), 0.05}},
 		Sphere{makeVec3(-1,0,-1), 0.4, Dialectric{1.5}},
 		Sphere{makeVec3(0.5,-0.2,-0.7), -0.1, Dialectric{1.1}},
 	}
-	world := HittableList{list}
+	world := World{list}
 
 	var image Image
 
@@ -56,7 +57,7 @@ func main() {
 	printImage(&image, concurrent)
 }
 
-func makePass(camera *Camera, world *HittableList, ch chan *Image, wg *sync.WaitGroup) {
+func makePass(camera *Camera, world *World, ch chan *Image, wg *sync.WaitGroup) {
 	var imagePass Image
 	for row := height - 1; row >= 0; row-- {
 		for column := 0; column < width; column++ {
@@ -70,7 +71,7 @@ func makePass(camera *Camera, world *HittableList, ch chan *Image, wg *sync.Wait
 				color = add(color, ray.color(world, 0))
 			}
 
-			color = divideByValue(color, float32(passesPerThread))
+			color = divideScalar(color, float32(passesPerThread))
 			index := row * width + column
 			imagePass[index] = color
 		}
@@ -97,7 +98,7 @@ func printImage(image *Image, numPasses int) {
 		for column := 0; column < width; column++ {
 			index := row * width + column
 			color := image[index]
-			color = divideByValue(color, float32(numPasses))
+			color = divideScalar(color, float32(numPasses))
 			color = makeVec3(sqrt(color.r()), sqrt(color.g()), sqrt(color.b()))
 
 			rInt := int16(255.99*color.r())

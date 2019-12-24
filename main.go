@@ -10,7 +10,7 @@ import (
 func main() {
 	width := 200
 	height := 100
-	numPasses := 200
+	numPasses := 100
 
 	file, err := os.Create("image.ppm")
 	if err != nil {
@@ -45,6 +45,7 @@ func main() {
 			}
 
 			color = divideByValue(color, float32(numPasses))
+			color = makeVec3(sqrt(color.r()), sqrt(color.g()), sqrt(color.b()))
 
 			rInt := int16(255.99*color.r())
 			gInt := int16(255.99*color.g())

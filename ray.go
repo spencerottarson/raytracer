@@ -11,11 +11,16 @@ func (r Ray) origin() Vec3 { return r.A }
 func (r Ray) direction() Vec3 { return r.B }
 func (r Ray) pointAtParameter(t float32) Vec3 { return add(r.A, multiplyByValue(r.B, t)) }
 
-func (r Ray) color(world Hittable) Vec3 {
+func (r Ray) color(world Hittable, depth int) Vec3 {
 	hit, tempRecord := world.hit(&r, 0.001, math.MaxFloat32)
 	if hit {
-		target := add(add(tempRecord.p, tempRecord.normal), randomInUnitSphere())
-		return multiplyByValue(makeRay(tempRecord.p, subtract(target, tempRecord.p)).color(world), 0.5)
+		if depth < 50 {
+			shouldReflect, attenuation, scattered := tempRecord.matPtr.scatter(r, &tempRecord)
+			if shouldReflect {
+				return multiply(scattered.color(world, depth+2), attenuation)
+			}
+		}
+		return makeVec3(0,0,0)
 	} else {
 		unitDirection := r.direction().makeUnitVector()
 		t := 0.5 * (unitDirection.y() + 1.0)

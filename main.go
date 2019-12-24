@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	width := 200
-	height := 100
-	numPasses := 100
+	width := 1000
+	height := 500
+	numPasses := 2000
 
 	file, err := os.Create("image.ppm")
 	if err != nil {
@@ -27,12 +27,15 @@ func main() {
 	camera := makeCamera()
 
 	list := []Hittable {
-		Sphere{makeVec3(0,0,-1), 0.5},
-		Sphere{makeVec3(0,-100.5,-1), 100},
+		Sphere{makeVec3(0,0,-1), 0.5, Lambertian{makeVec3(0.1, 0.3, 0.9)}},
+		Sphere{makeVec3(0,-100.5,-1), 100, Lambertian{makeVec3(0.8, 0.8, 0.0)}},
+		Sphere{makeVec3(1,0,-1), 0.3, Metal{makeVec3(0.8, 0.6, 0.2), 0.1}},
+		Sphere{makeVec3(-1,0,-1), 0.4, Metal{makeVec3(0.8, 0.8, 0.8), 1.0}},
 	}
 	world := HittableList{list}
 
 	for row := height - 1; row >= 0; row-- {
+		fmt.Println(row)
 		for column := 0; column < width; column++ {
 
 			color := makeVec3(0,0,0)
@@ -41,7 +44,7 @@ func main() {
 				v := (float32(row)+ rand.Float32()) / float32(height)
 
 				ray := camera.getRay(u, v)
-				color = add(color, ray.color(world))
+				color = add(color, ray.color(world, 0))
 			}
 
 			color = divideByValue(color, float32(numPasses))

@@ -4,6 +4,7 @@ type HitRecord struct {
 	t float32
 	p Vec3
 	normal Vec3
+	matPtr Material
 }
 
 type Hittable interface {

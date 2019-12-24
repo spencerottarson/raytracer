@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sync"
 )
 
 const (
-	width = 600
-	height = 300
-	numPasses = 100
+	width = 200
+	height = 100
+	passesPerThread = 50
+	concurrent = 4
 )
+
+type Image [width*height]Vec3
 
 func main() {
 	camera := makeCamera()
@@ -25,35 +29,58 @@ func main() {
 	}
 	world := HittableList{list}
 
-	var image [height * width]Vec3
+	var image Image
 
-	for pass := 0; pass < numPasses; pass++ {
-		fmt.Println(pass)
-		var imagePass [height * width]Vec3
+	ch := make(chan *Image, concurrent)
+	wg := sync.WaitGroup{}
+
+	for pass := 0; pass < concurrent; pass++ {
+		wg.Add(1)
+
+		go makePass(&camera, &world, ch, &wg)
+	}
+
+	wg.Wait()
+
+	close(ch)
+
+	for imagePass := range ch {
 		for row := height - 1; row >= 0; row-- {
 			for column := 0; column < width; column++ {
-				u := (float32(column) + rand.Float32()) / float32(width)
-				v := (float32(row)+ rand.Float32()) / float32(height)
-
-				ray := camera.getRay(u, v)
-				color := ray.color(world, 0)
-				index := row * width + column
-				imagePass[index] = color
-			}
-		}
-
-		for row := height - 1; row >= 0; row-- {
-			for column := 0; column < width; column++ {
-				index := row * width + column
+				index := row*width + column
 				image[index] = add(image[index], imagePass[index])
 			}
 		}
 	}
 
-	printImage(&image, numPasses)
+	printImage(&image, concurrent)
 }
 
-func printImage(image *[height * width]Vec3, numPasses int) {
+func makePass(camera *Camera, world *HittableList, ch chan *Image, wg *sync.WaitGroup) {
+	var imagePass Image
+	for row := height - 1; row >= 0; row-- {
+		for column := 0; column < width; column++ {
+
+			color := makeVec3(0,0,0)
+			for i := 0; i < passesPerThread; i++ {
+				u := (float32(column) + rand.Float32()) / float32(width)
+				v := (float32(row)+ rand.Float32()) / float32(height)
+
+				ray := camera.getRay(u, v)
+				color = add(color, ray.color(world, 0))
+			}
+
+			color = divideByValue(color, float32(passesPerThread))
+			index := row * width + column
+			imagePass[index] = color
+		}
+	}
+
+	ch <- &imagePass
+	wg.Done()
+}
+
+func printImage(image *Image, numPasses int) {
 	file, err := os.Create("image.ppm")
 	if err != nil {
 		panic(err)

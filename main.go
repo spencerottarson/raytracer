@@ -11,14 +11,19 @@ import (
 const (
 	width = 800
 	height = 400
-	passesPerThread = 20
+	passesPerThread = 50
 	concurrent = 4
 )
 
 type Image [width*height]Vec3
 
 func main() {
-	camera := makeCamera(makeVec3(-2, 2, 1),  makeVec3(0, 0, -1), makeVec3(0, 1, 0), 30, float32(width)/float32(height))
+	lookFrom := makeVec3(-2, 2, 1)
+	lookAt := makeVec3(0, 0, -1)
+	up := makeVec3(0, 1, 0)
+	distanceToFocus := subtract(lookFrom, lookAt).length()
+	aperture := float32(0.1)
+	camera := makeCamera(lookFrom, lookAt, up, 30, float32(width)/float32(height), aperture,distanceToFocus)
 
 	list := []Hittable {
 

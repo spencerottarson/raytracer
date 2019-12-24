@@ -17,3 +17,12 @@ func randomInUnitSphere() Vec3 {
 		}
 	}
 }
+
+func randomInUnitDisk() Vec3 {
+	for {
+		vector := subtract(multiplyScalar(makeVec3(rand.Float32(), rand.Float32(), 0), 2.0), makeVec3(1,1,0))
+		if dot(vector, vector) < 1.0 {
+			return vector
+		}
+	}
+}

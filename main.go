@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	width := 200
-	height := 100
+	width := 1200
+	height := 600
 
 	file, err := os.Create("image.ppm")
 	if err != nil {
@@ -27,13 +27,19 @@ func main() {
 	vertical := makeVec3(0.0, 2.0, 0.0)
 	origin := makeVec3(0.0, 0.0, 0.0)
 
+	list := []Hittable {
+		Sphere{makeVec3(0,0,-1), 0.5},
+		Sphere{makeVec3(0,-100.5,-1), 100},
+	}
+	world := HittableList{list}
+
 	for row := height - 1; row >= 0; row-- {
 		for column := 0; column < width; column++ {
 			u := float32(column) / float32(width)
 			v := float32(row) / float32(height)
 
-			ray := makeRay(origin, lowerLeftCorner.add(horizontal.multiplyByValue(u)).add(vertical.multiplyByValue(v)))
-			color := ray.color()
+			ray := makeRay(origin, add(add(lowerLeftCorner, multiplyByValue(horizontal, u)), multiplyByValue(vertical, v)))
+			color := ray.color(world)
 
 			rInt := int16(255.99*color.r())
 			gInt := int16(255.99*color.g())

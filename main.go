@@ -3,12 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 )
 
 func main() {
-	width := 1200
-	height := 600
+	width := 200
+	height := 100
+	numPasses := 200
 
 	file, err := os.Create("image.ppm")
 	if err != nil {
@@ -22,10 +24,7 @@ func main() {
 	fmt.Fprintf(writer, "%d %d\n", width, height)
 	fmt.Fprintln(writer, "255")
 
-	lowerLeftCorner := makeVec3(-2.0, -1.0, -1.0)
-	horizontal := makeVec3(4.0, 0.0, 0.0)
-	vertical := makeVec3(0.0, 2.0, 0.0)
-	origin := makeVec3(0.0, 0.0, 0.0)
+	camera := makeCamera()
 
 	list := []Hittable {
 		Sphere{makeVec3(0,0,-1), 0.5},
@@ -35,11 +34,17 @@ func main() {
 
 	for row := height - 1; row >= 0; row-- {
 		for column := 0; column < width; column++ {
-			u := float32(column) / float32(width)
-			v := float32(row) / float32(height)
 
-			ray := makeRay(origin, add(add(lowerLeftCorner, multiplyByValue(horizontal, u)), multiplyByValue(vertical, v)))
-			color := ray.color(world)
+			color := makeVec3(0,0,0)
+			for i := 0; i < numPasses; i++ {
+				u := (float32(column) + rand.Float32()) / float32(width)
+				v := (float32(row)+ rand.Float32()) / float32(height)
+
+				ray := camera.getRay(u, v)
+				color = add(color, ray.color(world))
+			}
+
+			color = divideByValue(color, float32(numPasses))
 
 			rInt := int16(255.99*color.r())
 			gInt := int16(255.99*color.g())

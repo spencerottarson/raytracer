@@ -9,31 +9,34 @@ import (
 )
 
 const (
-	width = 800
-	height = 400
-	passesPerThread = 50
-	concurrent = 4
+	width = 3840
+	height = 2160
+	passesPerThread = 60
+	concurrent = 3
 )
 
 type Image [width*height]Vec3
 
 func main() {
-	lookFrom := makeVec3(-2, 2, 1)
-	lookAt := makeVec3(0, 0, -1)
+	rand.Seed(5)
+	lookFrom := makeVec3(6, 2, 3.5)
+	lookAt := makeVec3(0, 0, 0)
 	up := makeVec3(0, 1, 0)
 	distanceToFocus := subtract(lookFrom, lookAt).length()
-	aperture := float32(0.1)
-	camera := makeCamera(lookFrom, lookAt, up, 30, float32(width)/float32(height), aperture,distanceToFocus)
+	aperture := float32(0.03)
+	camera := makeCamera(lookFrom, lookAt, up, 90, float32(width)/float32(height), aperture,distanceToFocus)
 
-	list := []Hittable {
+	//list := []Hittable {
+	//
+	//	Sphere{makeVec3(0,0,-1), 0.5, Lambertian{makeVec3(0.1, 0.3, 0.9)}},
+	//	Sphere{makeVec3(0,-100.5,-1), 100, Lambertian{makeVec3(0.8, 0.8, 0.0)}},
+	//	Sphere{makeVec3(1,0,-1), 0.3, Metal{makeVec3(0.83, 0.69, 0.22), 0.05}},
+	//	Sphere{makeVec3(-1,0,-1), 0.4, Dialectric{1.5}},
+	//	Sphere{makeVec3(0.5,-0.2,-0.7), -0.1, Dialectric{1.1}},
+	//}
+	//world := World{list}
 
-		Sphere{makeVec3(0,0,-1), 0.5, Lambertian{makeVec3(0.1, 0.3, 0.9)}},
-		Sphere{makeVec3(0,-100.5,-1), 100, Lambertian{makeVec3(0.8, 0.8, 0.0)}},
-		Sphere{makeVec3(1,0,-1), 0.3, Metal{makeVec3(0.83, 0.69, 0.22), 0.05}},
-		Sphere{makeVec3(-1,0,-1), 0.4, Dialectric{1.5}},
-		Sphere{makeVec3(0.5,-0.2,-0.7), -0.1, Dialectric{1.1}},
-	}
-	world := World{list}
+	world := randomWorld()
 
 	var image Image
 
@@ -43,7 +46,7 @@ func main() {
 	for pass := 0; pass < concurrent; pass++ {
 		wg.Add(1)
 
-		go makePass(&camera, &world, ch, &wg)
+		go makePass(&camera, world, ch, &wg)
 	}
 
 	wg.Wait()
@@ -65,6 +68,9 @@ func main() {
 func makePass(camera *Camera, world *World, ch chan *Image, wg *sync.WaitGroup) {
 	var imagePass Image
 	for row := height - 1; row >= 0; row-- {
+		if row % 10 == 0 {
+			fmt.Println(row)
+		}
 		for column := 0; column < width; column++ {
 
 			color := makeVec3(0,0,0)
